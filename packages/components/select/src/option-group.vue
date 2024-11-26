@@ -10,7 +10,6 @@
 </template>
 
 <script lang="ts">
-// @ts-nocheck
 import {
   computed,
   defineComponent,
@@ -25,6 +24,10 @@ import { useMutationObserver } from '@vueuse/core'
 import { ensureArray } from '@element-plus/utils'
 import { useNamespace } from '@element-plus/hooks'
 import { selectGroupKey } from './token'
+import type { VNodeChildAtom } from '@element-plus/utils'
+import type { VNode, VNodeArrayChildren } from 'vue'
+
+import type { OptionInternalInstance, OptionPublicInstance } from './type'
 
 export default defineComponent({
   name: 'ElOptionGroup',
@@ -43,8 +46,8 @@ export default defineComponent({
   setup(props) {
     const ns = useNamespace('select')
     const groupRef = ref(null)
-    const instance = getCurrentInstance()
-    const children = ref([])
+    const instance = getCurrentInstance()!
+    const children = ref<OptionPublicInstance[]>([])
 
     provide(
       selectGroupKey,
@@ -57,21 +60,24 @@ export default defineComponent({
       children.value.some((option) => option.visible === true)
     )
 
-    const isOption = (node) =>
-      node.type?.name === 'ElOption' && !!node.component?.proxy
+    const isOption = (
+      node: VNodeArrayChildren | VNodeChildAtom
+    ): node is VNode & { component: OptionInternalInstance } =>
+      (node as any).type?.name === 'ElOption' &&
+      !!(node as any).component?.proxy
 
     // get all instances of options
-    const flattedChildren = (node) => {
-      const Nodes = ensureArray(node)
-      const children = []
+    const flattedChildren = (node: VNode | VNodeArrayChildren | string) => {
+      const nodes = ensureArray(node) as VNode[] | VNodeArrayChildren
+      const children: OptionPublicInstance[] = []
 
-      Nodes.forEach((child) => {
+      nodes.forEach((child) => {
         if (isOption(child)) {
           children.push(child.component.proxy)
-        } else if (child.children?.length) {
-          children.push(...flattedChildren(child.children))
-        } else if (child.component?.subTree) {
-          children.push(...flattedChildren(child.component.subTree))
+        } else if ((child as any).children?.length) {
+          children.push(...flattedChildren((child as any).children))
+        } else if ((child as any).component?.subTree) {
+          children.push(...flattedChildren((child as any).component.subTree))
         }
       })
 

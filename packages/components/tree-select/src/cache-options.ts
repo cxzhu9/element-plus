@@ -1,21 +1,17 @@
 import { defineComponent, inject, watch } from 'vue'
 import { selectKey } from '@element-plus/components/select'
 import { isClient } from '@element-plus/utils'
-import type { SelectContext } from '@element-plus/components/select'
-import type { PropType } from 'vue'
 
-// same as el-option instance,
-// these are required for `cachedOptions`
-export type CacheOption = {
-  value: string | number | boolean | object
-  currentLabel: string | number
-  isDisabled: boolean
-}
+import type {
+  OptionBasic,
+  SelectContext,
+} from '@element-plus/components/select'
+import type { PropType } from 'vue'
 
 export default defineComponent({
   props: {
     data: {
-      type: Array as PropType<CacheOption[]>,
+      type: Array as PropType<OptionBasic[]>,
       default: () => [],
     },
   },

@@ -6,6 +6,7 @@
   <el-dialog
     v-model="centerDialogVisible"
     title="Warning"
+    modal="false"
     width="500"
     align-center
   >
